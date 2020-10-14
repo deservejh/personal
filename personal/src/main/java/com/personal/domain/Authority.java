@@ -5,8 +5,7 @@ import lombok.Data;
 @Data
 public class Authority {
 	
-	private int seq;
-    private String username;
+	private int userId;
     private String authority;
 
 }

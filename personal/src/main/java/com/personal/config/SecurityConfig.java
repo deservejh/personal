@@ -19,6 +19,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
     private CustomUserDetailService customUserDetailService;
 	
+	@Autowired
+	private CustomAuthenticationProvider customAuthenticationProvider;
+	
 	@Override 
 	public void configure(WebSecurity web) throws Exception { 
 		web.ignoring() 
@@ -33,23 +36,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+        	.csrf().disable()
 	        .authorizeRequests()
-	        .antMatchers("/", "/index").permitAll()
-	        .antMatchers("/admin").hasRole("ADMIN")
-	        .anyRequest().authenticated()
-        .and()
+		        .antMatchers("/", "/index").permitAll()
+		        .anyRequest().authenticated()
+		        .and()
             .formLogin()
-            .loginPage("/login")
-            .permitAll()
-        .and()
+	            .loginPage("/login")
+	            .loginProcessingUrl("/login/user")
+	            .usernameParameter("asdf")
+	            .passwordParameter("qwer")
+	            .permitAll()
+	            .and()
         	.logout()
-        	.logoutUrl("/logout");
+        		.logoutUrl("/logout")
+        		.permitAll();
+        
+        //CustomUserDetailService로 진행하지 않고 CustomAuthenticationProvider로 진행
+        http.authenticationProvider(customAuthenticationProvider);
     }
     
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    	auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
-        //auth.userDetailsService(customUserDetailService);
+        auth.userDetailsService(customUserDetailService);
     }
 
     @Bean
